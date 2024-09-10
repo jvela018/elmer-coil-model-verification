@@ -1,0 +1,7 @@
+! ----- names for bodies -----
+$ WIRE1 = 17
+$ WIRE2 = 18
+$ WIRE3 = 19
+$ AIR = 20
+! ----- names for boundaries -----
+$ INFINITY = 21
