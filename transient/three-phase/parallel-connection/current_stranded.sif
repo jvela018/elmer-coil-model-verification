@@ -60,21 +60,21 @@ Include "transient_2d_stranded_current_source.definition"
 
 Body 1
   Name = WIRE1
-  Material = 2
+  Material = 1
   Equation = 1
   Body Force = 1
 End
 
 Body 2
   Name = WIRE2
-  Material = 2
+  Material = 1
   Equation = 1
   Body Force = 1
 End
 
 Body 3
   Name = WIRE3
-  Material = 2
+  Material = 1
   Equation = 1
   Body Force = 1
 End
@@ -100,17 +100,10 @@ End
 !---------------------------------------------------------
 
 Material 1
-  Name = "Air2"
+  Name = "Air"
   Electric Conductivity = 0.0
   Relative Permittivity = 1.0
   Relative Permeability = 1.0
-End
-
-Material 2
-  Name = "Copper"
-  Electric Conductivity = 5.8e7
-  Relative Permittivity = 1.0
-  Relative Permeability = 1.0 
 End
 
 !---------------------------------------------------------

@@ -8,7 +8,7 @@ Check Keywords "Warn"
 !MESH DATA  
 !---------------------------------------------------------
 Header
-  Mesh DB "." "THREE_ROUND_WIRES"
+  Mesh DB "." "FULL_SINGLE_ROUND_WIRE"
 End
 !---------------------------------------------------------
 
@@ -52,39 +52,31 @@ End
 !---------------------------------------
 ! External Sources: Circuits 
 !-----------------------------------------
-Include "transient_2d_stranded_voltage_source.definition"
+Include "transient_2d_stranded_current_source.definition"
 
 !---------------------------------------------------------
 ! Domain Definitions
 !---------------------------------------------------------
 
 Body 1
-  Name = WIRE1
-  Material = 2
+  Name = WIRE1p
+  Material = 1
   Equation = 1
   Body Force = 1
 End
 
 Body 2
-  Name = WIRE2
-  Material = 2
+  Name = WIRE1m
+  Material = 1
   Equation = 1
   Body Force = 1
 End
 
 Body 3
-  Name = WIRE3
-  Material = 2
-  Equation = 1
-  Body Force = 1
-End
-
-Body 4
   Name = AIR
   Material = 1
   Equation = 1
 End
-
 
 !---------------------------------------------------------
 ! Boundary conditions
@@ -100,17 +92,10 @@ End
 !---------------------------------------------------------
 
 Material 1
-  Name = "Air2"
+  Name = "Air"
   Electric Conductivity = 0.0
   Relative Permittivity = 1.0
   Relative Permeability = 1.0
-End
-
-Material 2
-  Name = "Copper"
-  Electric Conductivity = 5.8e7
-  Relative Permittivity = 1.0
-  Relative Permeability = 1.0 
 End
 
 !---------------------------------------------------------

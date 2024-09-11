@@ -1,0 +1,6 @@
+! ----- names for bodies -----
+$ WIRE1p = 9
+$ WIRE1m = 10
+$ AIR = 11
+! ----- names for boundaries -----
+$ INFINITY = 11
