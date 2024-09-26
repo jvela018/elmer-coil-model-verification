@@ -1,0 +1,257 @@
+! Single Round wire - Massive wire
+! Transient Simulation
+! Author: Jonathan Velasco
+! Original date: August 2024
+!------------------------------------------------------
+Check Keywords "Warn"
+!---------------------------------------------------------
+!MESH DATA  
+!---------------------------------------------------------
+Header
+  Mesh DB "." "SINGLE_ROUND_WIRE_3D"
+End
+!---------------------------------------------------------
+
+
+! ---------------------------------
+! Time discretization parameters
+! ---------------------------------
+$ freq = 50                        ! Electrical Frequency in Hz
+$ we = 2*pi*freq		   ! Electrical frequency in radians/sec
+$ phase = 0
+$ stepsPerPeriod = 25
+$ periods = 2
+$ nsteps = periods*stepsPerPeriod
+$ stepsize=(periods/freq)/nsteps
+
+
+!---------------------------------------------------------
+!SIMULATION CONFIGURATION 
+!---------------------------------------------------------
+
+Simulation
+  Max Output Level = 4
+  Coordinate System = Cartesian 2D
+  Coordinate Scaling = 1.0
+  Simulation Type = Transient
+  Timestepping Method = BDF
+  BDF Order = 2
+  Timestep Sizes = $ stepsize
+  Timestep Intervals = $ nsteps
+  Use Mesh Names = Logical True
+End
+!---------------------------------------------------------
+
+Constants
+  Permittivity of Vacuum = 8.8542e-12
+  Permeability of Vacuum = 1.256e-6
+End
+
+Initial Condition 1
+   A  = Real 0
+End
+
+!---------------------------------------------------------
+
+!---------------------------------------
+! External Sources: Circuits 
+!-----------------------------------------
+Include "transient_3d_stranded_voltage_source.definition"
+
+!---------------------------------------------------------
+! Domain Definitions
+!---------------------------------------------------------
+
+Body 1
+  Name = WIRE
+  Material = 1
+  Equation = 1
+  Initial Condition = 1
+  Body Force = 1
+  Alpha reference (3) = Real 1 0 0
+  Beta reference (3) = Real 0 1 0
+End
+
+Body 2
+  Name = AIR
+  Material = 1
+  Equation = 1
+  Initial Condition = 1
+End
+
+
+!---------------------------------------------------------
+! Boundary conditions
+!---------------------------------------------------------
+
+Boundary Condition 1
+  Name = WIRE_ELECTRODE_1
+  A = Real 0
+End
+
+Boundary Condition 2
+  Name = WIRE_ELECTRODE_2
+  A = Real 0
+End
+
+Boundary Condition 3
+  Name = INFINITY
+  A = Real 0
+End
+
+!---------------------------------------------------------
+! Material Properties 
+!---------------------------------------------------------
+
+Material 1
+  Name = "Air"
+  Electric Conductivity = 0.0
+  Relative Permittivity = 1.0
+  Relative Permeability = 1.0
+End
+
+!---------------------------------------------------------
+! Solver Configuration
+!---------------------------------------------------------
+
+Equation 1
+   Active Solvers(5) = 6 7 8 9 10
+End
+Equation 2
+   Active Solvers(10) = 1 2 3 4 5 6 \
+                       7 8 9 10
+End
+
+Solver 1  !---- DirectionSolver, DirectionSolver
+   Exec Solver = Before all
+   Procedure = "DirectionSolver" "DirectionSolver"
+   Linear System Solver = Iterative
+   Linear System Iterative Method = BiCGStab
+   Linear System Max Iterations = 5000
+   Linear System Convergence Tolerance = 1.0e-10
+   Linear System Abort Not Converged = True
+   Linear System Residual Output = 1000
+   Equation = Direction Alpha
+   Variable =  Alpha
+End
+Solver 2  !---- DirectionSolver, DirectionSolver
+   Exec Solver = Before all
+   Procedure = "DirectionSolver" "DirectionSolver"
+   Linear System Solver = Iterative
+   Linear System Iterative Method = BiCGStab
+   Linear System Max Iterations = 5000
+   Linear System Convergence Tolerance = 1.0e-10
+   Linear System Abort Not Converged = True
+   Linear System Residual Output = 1000
+   Equation = Direction Beta
+   Variable =  Beta
+End
+Solver 3  !---- CoordinateTransform, RotMSolver
+   Exec Solver = Before All
+   Equation = Transformation matrix
+   Procedure = "CoordinateTransform" "RotMSolver"
+   Variable = -nooutput Dummy
+   Optimize Bandwidth = False
+   Polar Decomposition Determinant Tolerance = Real 1.0e-9
+   Polar Decomposition Max Iterations = Integer 100
+   Exported Variable 1 = -nooutput RotM E[RotM E:9]
+   Exported Variable 2 = -nooutput Alpha Vector E[Alpha Vector E:3]
+   Exported Variable 3 = -nooutput Beta Vector E[Beta Vector E:3]
+   Exported Variable 4 = -nooutput Gamma Vector E[Gamma Vector E:3]
+   Discontinuous Galerkin = True
+End
+Solver 4  !---- WPotentialSolver, Wsolve
+   Exec Solver = Before All
+   Procedure = "WPotentialSolver" "Wsolve"
+   Equation = "Wire direction"
+   Variable = W
+   Linear System Solver = Iterative
+   Linear System Iterative Method = CG
+   Linear System Max Iterations = 10000
+   Linear System Convergence Tolerance = 1.0e-10
+   Linear System Abort Not Converged = True
+   Linear System Residual Output = 1000
+End
+Solver 5  !---- CircuitsAndDynamics, CircuitsAndDynamics
+   Exec Solver = Always
+   Equation = Circuits
+   Variable = X
+   No Matrix = Logical True
+   Procedure = "CircuitsAndDynamics" "CircuitsAndDynamics"
+End
+Solver 6  !---- MagnetoDynamics, WhitneyAVSolver
+   Exec Solver = Always
+   Equation = "MGDynamics"
+   Variable = "A"
+   Procedure = "MagnetoDynamics" "WhitneyAVSolver"
+   NonLinear System Relaxation Factor=1
+   Export Lagrange Multiplier = Logical True
+   Linear System Solver = Iterative
+   Linear System Iterative Method = BicgstabL
+   Linear System preconditioning = none
+   Linear System Convergence Tolerance = 1.e-8
+   Linear System Max Iterations = 3000
+   Linear System Residual Output = 1000
+   Linear System ILUT Tolerance=1e-8
+   BicgstabL polynomial degree = 6
+   Steady State Convergence Tolerance = 1e-08
+End
+
+Solver 7  !---- MagnetoDynamics, MagnetoDynamicsCalcFields
+   Exec Solver = Always
+   Equation = "MGDynamicsCalc"
+   Procedure = "MagnetoDynamics" "MagnetoDynamicsCalcFields"
+   Linear System Symmetric = True
+   Potential Variable = String "A"
+   Calculate Current Density = Logical True
+   Loss Estimation = Logical True
+   Steady State Convergence Tolerance = 0
+   Linear System Solver = "Iterative"
+   Linear System Preconditioning = None
+   Linear System Residual Output = 1000
+   Linear System Max Iterations = 5000
+   Linear System Iterative Method = CG
+   Steady State Convergence Tolerance = 1e-6
+   Linear System Convergence Tolerance = 1.0e-8
+End
+Solver 8  !---- CircuitsAndDynamics, CircuitsOutput
+   Exec Solver = Always
+   Equation = Circuits Output
+   Procedure = "CircuitsAndDynamics" "CircuitsOutput"
+End
+Solver 9  !---- ResultOutputSolve, ResultOutputSolver
+   Exec Solver = Always
+   Equation = "ResultOutput"
+   Procedure = "ResultOutputSolve" "ResultOutputSolver"
+   Output File Name = 6480-results
+   Vtu format = Logical True
+   Save Geometry Ids = Logical True
+End
+Solver 10  !---- SaveData, SaveScalars
+   Exec Solver = After timestep
+   Equation = "sv"
+   Procedure = "SaveData" "SaveScalars"
+   Filename = 6480/dat/6480.dat
+End
+Equation 1
+   Active Solvers(2) = 6 7
+End
+Equation 2
+   Active Solvers(7) = 1 2 3 4 5 6 \
+                       7
+End
+
+Solver 6
+   Equation = Circuits Output
+   Procedure = "CircuitsAndDynamics" "CircuitsOutput"
+End
+
+Solver 7
+   Exec Solver = After Timestep
+   Procedure = "SaveData" "SaveScalars"
+   Filename = results_stranded/w1.dat
+   Save Component Results = True 
+   Variable 1 = time
+End
+
+

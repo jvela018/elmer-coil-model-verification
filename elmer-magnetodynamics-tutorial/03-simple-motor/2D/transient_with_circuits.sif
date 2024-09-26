@@ -1,0 +1,335 @@
+! Inspired by Induction Motor Analyses InternationalTEAM Workshop Problem 30
+! Transient Simulation
+! Author: Jonathan Velasco
+! Original date: August 2024
+!------------------------------------------------------
+Check Keywords "Warn"
+!---------------------------------------------------------
+!MESH DATA  
+!---------------------------------------------------------
+Header
+  Mesh DB "." "MODIFIED_TEAM30a_3ph"
+End
+!---------------------------------------------------------
+
+
+!---------------------------------------------------------
+!Parameters
+!---------------------------------------------------------
+$ rpm = 9549.3                 ! Rotational speed (1/min)
+$ WM = 2*pi*rpm/60             ! Mechanical Frequency [rad/s]
+$ PP = 2                       ! Pole pairs
+$ DegreesPerSec = WM*180.0/pi  !
+$ RotorInitPos = 0             ! Initial Rotor Position
+$ f = rpm/60*PP                ! Electrical frequency (Hz)
+$ T = 1/f                      ! Period
+$ nSteps = 100                 ! number of steps
+$ nPeriods= 4		       ! Number of periods
+$ rot_dir = 1 ! Direction of rotation. 1: CCW, -1: CW
+$ stepSize = nPeriods*T/nSteps
+!---------------------------------------------------------
+!SIMULATION CONFIGURATION 
+!---------------------------------------------------------
+
+Simulation
+  Max Output Level = 4
+  Coordinate System = Cartesian 2D
+  Coordinate Scaling = 1.0
+  Simulation Type = Transient
+  Timestepping Method = BDF
+  BDF Order = 2
+  Timestep Sizes = $stepSize
+  Timestep Intervals = $nSteps
+  Use Mesh Names = Logical True
+End
+!---------------------------------------------------------
+
+Constants
+  Permittivity of Vacuum = 8.8542e-12
+  Permeability of Vacuum = 1.256e-6
+End
+
+!---------------------------------------------------------
+
+Body 1
+  Name = Rotor_Steel
+  Material = 2
+  Equation = 1
+  Body Force = 2
+  Torque Groups = Integer 1
+End
+
+Body 2
+  Name = Rotor_Aluminum
+  Material = 3
+  Equation = 1
+  Body Force = 2
+  Torque Groups = Integer 1
+End
+
+Body 3
+  Name = Rotor_side_Airgap
+  Material = 1
+  Equation = 1
+  Body Force = 2
+  Torque Groups = Integer 1
+
+  ! Torque Calculation Method 1:
+  ! Arkkio's Method
+  ! Only valid in uniform airgap models
+  r inner = Real 3e-2
+  r outer = Real 3.2e-2
+End
+
+Body 4
+  Name = Stator_side_Airgap
+  Material = 1
+  Equation = 1
+End
+
+Body 5
+  Name = Stator_Air
+  Material = 1
+  Equation = 1
+End
+
+Body 6
+  Name = Stator_Steel
+  Material = 4
+  Equation = 1
+End
+
+Body 7
+  Name = Winding_1_plus
+  Material = 1
+  Equation = 1
+  Body Force = 1
+End
+
+Body 8
+  Name = Winding_1_minus
+  Material = 1
+  Equation = 1
+  Body Force = 1
+End
+
+Body 9
+  Name = Winding_2_plus
+  Material = 1
+  Equation = 1
+  Body Force = 1
+End
+
+Body 10
+  Name = Winding_2_minus
+  Material = 1
+  Equation = 1
+  Body Force = 1
+End
+
+Body 11
+  Name = Winding_3_plus
+  Material = 1
+  Equation = 1
+  Body Force = 1
+End
+
+Body 12
+  Name = Winding_3_minus
+  Material = 1
+  Equation = 1
+  Body Force = 1
+End
+
+Body 13
+  Name = Permanent_Magnet_1 ! In this model this is just air as part of the rotor airgap
+  Material = 1
+  Equation = 1
+  Body Force = 2
+  Torque Groups = Integer 1
+
+  ! Torque Calculation Method 1:
+  ! Arkkio's Method
+  ! Only valid in uniform airgap models
+  r inner = Real 3e-2
+  r outer = Real 3.2e-2
+End
+
+Body 14
+  Name = Permanent_Magnet_2 ! In this model this is just air as part of the rotor airgap
+  Material = 1
+  Equation = 1
+  Body Force = 2
+  Torque Groups = Integer 1
+
+  ! Torque Calculation Method 1:
+  ! Arkkio's Method
+  ! Only valid in uniform airgap models
+  r inner = Real 3e-2
+  r outer = Real 3.2e-2
+End
+
+!---------------------------------------------------------
+! Boundary conditions
+!---------------------------------------------------------
+
+Boundary Condition 1
+  Name = Infinity
+  A re = Real 0
+End
+
+Boundary Condition 2
+  Name = Stator_side_Mortar_Boundary
+End
+
+Boundary Condition 3
+  Name = Rotor_side_Mortar_Boundary
+  Mortar BC Static = Logical True
+  Rotational Projector = Logical True
+  Galerkin Projector = Logical True
+ 
+  Mortar BC = Integer 2
+End
+
+
+!---------------------------------------------------------
+!Sources (Coming from circuit definition)
+!---------------------------------------------------------
+
+! Body Force 1 is defined within the circuit definition
+! All circuits should always be under Body Force 1
+
+Include "voltage_circuit.definition"
+!Include "current_circuit.definition"
+
+Body Force 2
+! Rotor rotation
+  Mesh Rotate 3 = Variable "time", "timestep size"
+     Real MATC "RotorInitPos+rot_dir*(tx(0)-tx(1))*DegreesPerSec"
+
+End 
+
+
+! Torque Calculation Method 2:
+! Rotor Component for torque calculation using
+! the sum of nodal forces in rotating domains
+! The postprocessing quantity is obtained via the CalcFields Solver
+! Note: Components 1-6 are under the circuit definitions.
+
+Component 7
+  Name = String "Rotating_Domains"
+  Master Bodies(2) = Integer 1 2  
+  Calculate Magnetic Torque = Logical true
+End
+
+
+!---------------------------------------------------------
+! Material Properties 
+!---------------------------------------------------------
+
+Material 1
+  Name = "Air"
+  Electric Conductivity = 0.0
+  Relative Permittivity = 1.0
+  Relative Permeability = 1.0
+End
+
+Material 2
+  Name = "Rotor_Steel"
+  Electric Conductivity = 1.6e6
+  Relative Permittivity = 1.0
+  Relative Permeability = 30.0
+End
+
+Material 3
+  Name = "Rotor_Aluminum"
+  Electric Conductivity = 3.72e7
+  Relative Permittivity = 1.0
+  Relative Permeability = 1.0
+End
+
+Material 4
+  Name = "Stator_Steel"
+  Electric Conductivity = 0.0
+  Relative Permittivity = 1.0
+  Relative Permeability = 30.0
+End
+
+
+!---------------------------------------------------------
+! Solver Configuration
+!---------------------------------------------------------
+
+Equation 1
+  Active Solvers(7) = 1 2 3 4 5 6 7
+End
+
+Solver 1
+	Exec Solver = Before Timestep
+	Equation = MeshDeform
+	Procedure = "RigidMeshMapper" "RigidMeshMapper"
+End
+
+
+Solver 2
+  Exec Solver = Always
+  Equation = Circuits
+  Variable = X
+  No Matrix = Logical True  
+  Procedure = "CircuitsAndDynamics" "CircuitsAndDynamics"
+End
+
+
+Solver 3
+  Equation = MgDyn2D
+  Variable = A
+  Procedure = "MagnetoDynamics2D" "MagnetoDynamics2D"
+  Linear System Solver = Direct
+  Linear System Direct Method = MUMPS
+
+  ! Needed for strong coupling with circuits
+  Export Lagrange Multiplier = True
+
+  ! For projection
+  Apply Mortar BCs = Logical True
+
+End 
+
+Solver 4
+  Equation = CalcFields
+  Procedure = "MagnetoDynamics" "MagnetoDynamicsCalcFields"
+  Linear System Solver = Direct
+  Calculate Current Density = Logical True 
+  Calculate Magnetic Vector Potential = Logical True
+  Calculate Nodal Fields     = Logical True
+  Calculate Elemental Fields = Logical False 
+  Calculate Nodal Forces = Logical True
+End
+
+
+Solver 5
+  Equation = "ResultOutput"
+  Procedure = "ResultOutputSolve" "ResultOutputSolver"
+  Exec Solver = after saving 
+  Output File Name = TEAM30A_3ph
+  Output Directory = res
+  Save Geometry Ids = Logical True
+  Vtu Format = Logical True
+End 
+
+Solver 6
+   Equation = Circuits Output
+   Procedure = "CircuitsAndDynamics" "CircuitsOutput"
+End
+
+Solver 7
+   Exec Solver = After Timestep
+   Procedure = "SaveData" "SaveScalars"
+   Filename = res/w1.dat
+   Save Component Results = True 
+   Variable 1 = time
+End
+
+
+
+

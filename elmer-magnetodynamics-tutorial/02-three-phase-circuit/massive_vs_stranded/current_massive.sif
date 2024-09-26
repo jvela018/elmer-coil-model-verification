@@ -1,4 +1,4 @@
-! Single Round wire - Massive wire
+! Three Round wires - Massive wire
 ! Transient Simulation
 ! Author: Jonathan Velasco
 ! Original date: August 2024
@@ -8,7 +8,7 @@ Check Keywords "Warn"
 !MESH DATA  
 !---------------------------------------------------------
 Header
-  Mesh DB "." "SINGLE_ROUND_WIRE"
+  Mesh DB "." "FULL_THREE_ROUND_WIRES"
 End
 !---------------------------------------------------------
 
@@ -52,20 +52,55 @@ End
 !---------------------------------------
 ! External Sources: Circuits 
 !-----------------------------------------
-Include "transient_2d_stranded_current_source.definition"
+Include "circuits/transient_2d_massive_current_source.definition"
 
 !---------------------------------------------------------
 ! Domain Definitions
 !---------------------------------------------------------
 
 Body 1
-  Name = WIRE
+  Name = WIRE1p
   Material = 2
   Equation = 1
   Body Force = 1
 End
 
 Body 2
+  Name = WIRE1m
+  Material = 2
+  Equation = 1
+  Body Force = 1
+End
+
+Body 3
+  Name = WIRE2p
+  Material = 2
+  Equation = 1
+  Body Force = 1
+End
+
+Body 4
+  Name = WIRE2m
+  Material = 2
+  Equation = 1
+  Body Force = 1
+End
+
+Body 5
+  Name = WIRE3p
+  Material = 2
+  Equation = 1
+  Body Force = 1
+End
+
+Body 6
+  Name = WIRE3m
+  Material = 2
+  Equation = 1
+  Body Force = 1
+End
+
+Body 7
   Name = AIR
   Material = 1
   Equation = 1
@@ -161,7 +196,7 @@ Solver 5
   Procedure = "ResultOutputSolve" "ResultOutputSolver"
   Exec Solver = after saving 
   Output File Name = single_wire
-  Output Directory = results_stranded
+  Output Directory = results_massive
   Save Geometry Ids = Logical True
   Vtu Format = Logical True
 End 
@@ -174,7 +209,7 @@ End
 Solver 7
    Exec Solver = After Timestep
    Procedure = "SaveData" "SaveScalars"
-   Filename = results_stranded/w1.dat
+   Filename = results_massive/w1.dat
    Save Component Results = True 
    Variable 1 = time
 End

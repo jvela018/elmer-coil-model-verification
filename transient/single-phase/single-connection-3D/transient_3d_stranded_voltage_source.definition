@@ -72,7 +72,7 @@ Component 1
   Resistance = Real $ R_T1p
  
   ! Additions for 3D Coil
-  Electrode Boundaries(2) = Integer 1 2
+  !Electrode Boundaries(2) = Integer 1 2
   !Circuit Equation Voltage Factor = Real 0.5 !
 End 
 

@@ -1,0 +1,210 @@
+! -----------------------------------------------------------------------------
+! ElmerFEM Circuit Generated: September 04, 2024
+! -----------------------------------------------------------------------------
+
+! -----------------------------------------------------------------------------
+! Number of Circuits in Model
+! -----------------------------------------------------------------------------
+$ Circuits = 1
+
+! -----------------------------------------------------------------------------
+! Parameters
+! -----------------------------------------------------------------------------
+
+! General Parameters 
+$ I1 = 1000
+$ I2 = 1000
+$ I3 = 1000
+
+$ Rdc = 0 !1 !0.022
+
+! Parameters in Component 1: T1p
+$ N_T1p = 100	 ! Number of Turns
+$ R_T1p = Rdc	 ! Coil Resistance
+$ Ns_T1p = 1	 ! Sector/Symmetry Coefficient (e.g. 4 is 1/4 of the domain)
+! Parameters in Component 2: T1m
+$ N_T1m = 100	 ! Number of Turns
+$ R_T1m = Rdc	 ! Coil Resistance
+$ Ns_T1m = 1	 ! Sector/Symmetry Coefficient (e.g. 4 is 1/4 of the domain)
+! Parameters in Component 3: T2p
+$ N_T2p = 100	 ! Number of Turns
+$ R_T2p = Rdc	 ! Coil Resistance
+$ Ns_T2p = 1	 ! Sector/Symmetry Coefficient (e.g. 4 is 1/4 of the domain)
+! Parameters in Component 4: T2m
+$ N_T2m = 100	 ! Number of Turns
+$ R_T2m = Rdc	 ! Coil Resistance
+$ Ns_T2m = 1	 ! Sector/Symmetry Coefficient (e.g. 4 is 1/4 of the domain)
+! Parameters in Component 5: T3p
+$ N_T3p = 100	 ! Number of Turns
+$ R_T3p = Rdc	 ! Coil Resistance
+$ Ns_T3p = 1	 ! Sector/Symmetry Coefficient (e.g. 4 is 1/4 of the domain)
+! Parameters in Component 6: T3m
+$ N_T3m = 100	 ! Number of Turns
+$ R_T3m = Rdc	 ! Coil Resistance
+$ Ns_T3m = 1	 ! Sector/Symmetry Coefficient (e.g. 4 is 1/4 of the domain)
+
+! -----------------------------------------------------------------------------
+! Matrix Size Declaration and Matrix Initialization
+! -----------------------------------------------------------------------------
+$ C.1.variables = 24
+$ C.1.perm = zeros(C.1.variables)
+$ C.1.A = zeros(C.1.variables,C.1.variables)
+$ C.1.B = zeros(C.1.variables,C.1.variables)
+
+! -----------------------------------------------------------------------------
+! Dof/Unknown Vector Definition
+! -----------------------------------------------------------------------------
+$ C.1.name.1 = "i_I1"
+$ C.1.name.2 = "i_I2"
+$ C.1.name.3 = "i_I3"
+$ C.1.name.4 = "i_component(1)"
+$ C.1.name.5 = "i_component(2)"
+$ C.1.name.6 = "i_component(3)"
+$ C.1.name.7 = "i_component(4)"
+$ C.1.name.8 = "i_component(5)"
+$ C.1.name.9 = "i_component(6)"
+$ C.1.name.10 = "v_I1"
+$ C.1.name.11 = "v_I2"
+$ C.1.name.12 = "v_I3"
+$ C.1.name.13 = "v_component(1)"
+$ C.1.name.14 = "v_component(2)"
+$ C.1.name.15 = "v_component(3)"
+$ C.1.name.16 = "v_component(4)"
+$ C.1.name.17 = "v_component(5)"
+$ C.1.name.18 = "v_component(6)"
+$ C.1.name.19 = "u_1_circuit_1"
+$ C.1.name.20 = "u_3_circuit_1"
+$ C.1.name.21 = "u_4_circuit_1"
+$ C.1.name.22 = "u_5_circuit_1"
+$ C.1.name.23 = "u_6_circuit_1"
+$ C.1.name.24 = "u_7_circuit_1"
+
+! -----------------------------------------------------------------------------
+! Source Vector Definition
+! -----------------------------------------------------------------------------
+$ C.1.source.22 = "I1_Source"
+$ C.1.source.23 = "I2_Source"
+$ C.1.source.24 = "I3_Source"
+
+! -----------------------------------------------------------------------------
+! KCL Equations
+! -----------------------------------------------------------------------------
+$ C.1.B(0,0) = 1
+$ C.1.B(0,3) = 1
+$ C.1.B(1,0) = -1
+$ C.1.B(1,4) = 1
+$ C.1.B(2,1) = 1
+$ C.1.B(2,5) = 1
+$ C.1.B(3,1) = -1
+$ C.1.B(3,6) = 1
+$ C.1.B(4,2) = 1
+$ C.1.B(4,7) = 1
+$ C.1.B(5,2) = -1
+$ C.1.B(5,8) = 1
+
+! -----------------------------------------------------------------------------
+! KVL Equations
+! -----------------------------------------------------------------------------
+$ C.1.B(6,9) = 1
+$ C.1.B(6,18) = 1
+$ C.1.B(6,19) = -1
+$ C.1.B(7,10) = 1
+$ C.1.B(7,20) = 1
+$ C.1.B(7,21) = -1
+$ C.1.B(8,11) = 1
+$ C.1.B(8,22) = 1
+$ C.1.B(8,23) = -1
+$ C.1.B(9,12) = -1
+$ C.1.B(9,18) = 1
+$ C.1.B(10,13) = -1
+$ C.1.B(10,19) = 1
+$ C.1.B(11,14) = -1
+$ C.1.B(11,20) = 1
+
+! -----------------------------------------------------------------------------
+! Component Equations
+! -----------------------------------------------------------------------------
+$ C.1.B(18,15) = -1
+$ C.1.B(18,21) = 1
+$ C.1.B(19,16) = -1
+$ C.1.B(19,22) = 1
+$ C.1.B(20,17) = -1
+$ C.1.B(20,23) = 1
+$ C.1.B(21,0) = 1
+$ C.1.B(22,1) = 1
+$ C.1.B(23,2) = 1
+
+
+! -----------------------------------------------------------------------------
+! Additions in SIF file
+! -----------------------------------------------------------------------------
+Component 1
+  Name = "T1p"
+  Master Bodies Name = Winding_1_plus
+  Coil Type = "Stranded"
+  Number of Turns = Real $ N_T1p
+  Resistance = Real $ R_T1p
+  Symmetry Coefficient = Real $ 1/(Ns_T1p)
+End 
+
+Component 2
+  Name = "T1m"
+  Master Bodies Name = Winding_1_minus
+  Coil Type = "Stranded"
+  Number of Turns = Real $ N_T1m
+  Resistance = Real $ R_T1m
+  Symmetry Coefficient = Real $ 1/(Ns_T1m)
+End 
+
+Component 3
+  Name = "T2p"
+  Master Bodies Name = Winding_2_plus
+  Coil Type = "Stranded"
+  Number of Turns = Real $ N_T2p
+  Resistance = Real $ R_T2p
+  Symmetry Coefficient = Real $ 1/(Ns_T2p)
+End 
+
+Component 4
+  Name = "T2m"
+  Master Bodies Name = Winding_2_minus
+  Coil Type = "Stranded"
+  Number of Turns = Real $ N_T2m
+  Resistance = Real $ R_T2m
+  Symmetry Coefficient = Real $ 1/(Ns_T2m)
+End 
+
+Component 5
+  Name = "T3p"
+  Master Bodies Name = Winding_3_plus
+  Coil Type = "Stranded"
+  Number of Turns = Real $ N_T3p
+  Resistance = Real $ R_T3p
+  Symmetry Coefficient = Real $ 1/(Ns_T3p)
+End 
+
+Component 6
+  Name = "T3m"
+  Master Bodies Name = Winding_3_minus
+  Coil Type = "Stranded"
+  Number of Turns = Real $ N_T3m
+  Resistance = Real $ R_T3m
+  Symmetry Coefficient = Real $ 1/(Ns_T3m)
+End 
+
+! -----------------------------------------------------------------------------
+! Sources in SIF 
+! -----------------------------------------------------------------------------
+
+Body Force 1
+  I1_Source = Variable "time" 
+  	 Real MATC "I1*sin((tx)*2*pi*f)"
+  I2_Source = Variable "time" 
+  	 Real MATC "I2*sin((tx)*2*pi*f+2*pi/3)"
+  I3_Source = Variable "time" 
+  	 Real MATC "I3*sin((tx)*2*pi*f-2*pi/3)"
+End
+
+! -----------------------------------------------------------------------------
+! End of Circuit
+! -----------------------------------------------------------------------------

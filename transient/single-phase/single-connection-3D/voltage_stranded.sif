@@ -50,7 +50,6 @@ End
 Initial Condition 1
   AV = 0.0      ! sets electric scalar potential to zero
   AV {e} = 0.0 ! sets magnetic vector potential to zero
-  Jfix  = Real 0.0
 End
 
 !---------------------------------------------------------
@@ -66,7 +65,7 @@ Include "transient_3d_stranded_voltage_source.definition"
 
 Body 1
   Name = WIRE
-  Material = 2
+  Material = 1
   Equation = 2
   Initial Condition = 1
   Body Force = 1
@@ -87,18 +86,19 @@ End
 Boundary Condition 1
   Name = WIRE_ELECTRODE_1
   AV {e} = 0.0 ! sets magnetic vector potential to zero
+  Coil Start = Logical True
 End
 
 Boundary Condition 2
   Name = WIRE_ELECTRODE_2
   AV {e} = 0.0 ! sets magnetic vector potential to zero
+  Coil End = Logical True
 End
 
 Boundary Condition 3
   Name = INFINITY
   AV = 0.0      ! sets electric scalar potential to zero
   AV {e} = 0.0 ! sets magnetic vector potential to zero
-  Jfix  = Real 0.0
 End
 
 !---------------------------------------------------------
@@ -111,14 +111,6 @@ Material 1
   Relative Permittivity = 1.0
   Relative Permeability = 1.0
 End
-
-Material 2
-  Name = "Artificial Material for CoilSolver"
-  Electric Conductivity = 1.0e-2
-  Relative Permittivity = 1.0
-  Relative Permeability = 1.0
-End
-
 
 !---------------------------------------------------------
 ! Solver Configuration
@@ -136,19 +128,23 @@ End
 
 
 Solver 1  !---- CoilSolver, CoilSolver
-  Exec Solver = Before All
-  Equation = "CoilSolver"
+  Exec Solver = Before timestep
+  Equation = CoilSolver
   Procedure = "CoilSolver" "CoilSolver"
-
-  Linear System Solver = "Iterative"
-  Linear System Preconditioning = ilu1
-  Linear System Max Iterations = 1000
-  Linear System Convergence Tolerance = 1e-10
-  Linear System Iterative Method = BiCGStabL
+  Linear System Solver = Iterative
+  Linear System Direct Method = Umfpack
+  Linear System Preconditioning = ILU1
+  Linear System Max Iterations = 2000
+  Linear System Iterative Method = idrs
+  Linear System Convergence Tolerance = 1e-9
   Linear System Residual Output = 20
-  Steady State Convergence Tolerance = 1e-06
+  Coil Closed = Logical False
 
-  Normalize Coil Current = True
+  Calculate Elemental Fields = True
+  Fix Input Current Density = True
+
+  !Normalize Coil Current = True
+  !Desired Coil Current = 100.0
   
 End
 Solver 2  !---- CircuitsAndDynamics, CircuitsAndDynamics
@@ -157,7 +153,6 @@ Solver 2  !---- CircuitsAndDynamics, CircuitsAndDynamics
    Variable = X
    No Matrix = Logical True
    Procedure = "CircuitsAndDynamics" "CircuitsAndDynamics"
-   Use Elemental CoilCurrent = True
 End
 Solver 3  !---- MagnetoDynamics, WhitneyAVSolver
    Exec Solver = Always
@@ -168,7 +163,7 @@ Solver 3  !---- MagnetoDynamics, WhitneyAVSolver
    Export Lagrange Multiplier = Logical True
    Linear System Solver = Iterative
    Linear System Iterative Method = BicgstabL
-   Linear System preconditioning = circuit
+   Linear System preconditioning = none
    Linear System Convergence Tolerance = 1.e-8
    Linear System Max Iterations = 3000
    Linear System Residual Output = 1000
@@ -182,13 +177,13 @@ Solver 4  !---- MagnetoAndDynamics, MagnetoDynamicsCalcFields
   Procedure = "MagnetoDynamics" "MagnetoDynamicsCalcFields"
   
   Potential Variable = String "AV"
-  Steady State Convergence Tolerance = 1.0e-8
+  Steady State Convergence Tolerance = 1.0e-6
   
   Linear System Solver = Iterative
   Linear System Symmetric = True
   Linear System Iterative Method = CG
   Linear System Max Iterations = 5000
-  Linear System Convergence Tolerance = 1.0e-8
+  Linear System Convergence Tolerance = 1.0e-6
   Linear System Preconditioning = ILU0
   Linear System ILUT Tolerance = 1.0e-3
   Linear System Abort Not Converged = False
